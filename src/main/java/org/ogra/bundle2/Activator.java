@@ -19,10 +19,15 @@ import org.ogra.bundle1.PallindromeService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, EventHandler {
 
     private ServiceReference serviceReg;
+    private ServiceRegistration<?> eventHandler;
+
 
     public void start(BundleContext context) {
         System.out.println("Starting the bundle2");
@@ -30,10 +35,26 @@ public class Activator implements BundleActivator {
         PallindromeService ms = (PallindromeService) context.getService(serviceReg);
         boolean b = ms.isPallindrome("abccba");
         System.out.println(b);
+
+        eventHandler = context.registerService(EventHandler.class.getName(), new EventHandler() {
+            @Override
+            public void handleEvent(Event event) {
+                String topic = event.getTopic();
+                System.out.println("Received event with topic: " + topic);
+            }
+        }, null);
     }
 
     public void stop(BundleContext context) {
         System.out.println("Stopping the bundle2");
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        // Handle the received event
+        String topic = event.getTopic();
+        System.out.println("Received event with topic: " + topic);
+        // Add your custom logic here based on the event topic
     }
 
 }
